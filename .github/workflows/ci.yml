@@ -1,0 +1,110 @@
+name: Cortexion CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ──────────────────────────────────────────
+  # Gateway — Node.js LoRa→MQTT Bridge
+  # ──────────────────────────────────────────
+  gateway:
+    name: Gateway Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gateway
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: gateway/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint --if-present
+
+  # ──────────────────────────────────────────
+  # Backend — Express + WebSocket API
+  # ──────────────────────────────────────────
+  backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint --if-present
+
+  # ──────────────────────────────────────────
+  # Web Dashboard — Next.js Build Check
+  # ──────────────────────────────────────────
+  web:
+    name: Web Dashboard Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm run lint --if-present
+
+  # ──────────────────────────────────────────
+  # ML Pipeline — Python Tests
+  # ──────────────────────────────────────────
+  ml:
+    name: ML Pipeline Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ml/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: pytest tests/ -v --tb=short
+
+  # ──────────────────────────────────────────
+  # Simulator — Python Lint & Type Check
+  # ──────────────────────────────────────────
+  simulator:
+    name: Simulator Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: simulator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r requirements.txt
+      - run: python -m py_compile packet_generator.py
+      - run: python -m py_compile serial_emitter.py
+      - run: python -m py_compile scenarios.py

@@ -1,0 +1,91 @@
+# ============================================
+# Cortexion — Connected Vehicle Intelligence
+# ============================================
+
+# ---- Secrets & Config (NEVER commit) ----
+firmware/common/config.h
+*.env
+!*.env.example
+secrets/
+.env.local
+.env.production
+
+# ---- PlatformIO / Firmware ----
+.pio/
+.pioenvs/
+.piolibdeps/
+firmware/**/lib/
+firmware/**/.vscode/
+
+# ---- Node.js ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+
+# ---- Python / ML ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.whl
+venv/
+.venv/
+env/
+.conda/
+*.ipynb_checkpoints/
+ml/data/*.csv
+ml/data/*.parquet
+ml/data/*.json
+!ml/data/.gitkeep
+ml/models/*.joblib
+ml/models/*.pt
+ml/models/*.onnx
+!ml/models/manifest.json
+
+# ---- Next.js / Web ----
+.next/
+out/
+web/.next/
+web/out/
+web/node_modules/
+
+# ---- Docker ----
+docker-compose.override.yml
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Build / Logs ----
+*.log
+logs/
+coverage/
+.nyc_output/
+*.tgz
+
+# ---- OS ----
+.DS_Store
+.AppleDouble
+.LSOverride
+ehthumbs.db
+ehthumbs_vista.db
+
+# ---- Implementation plan files (do not push) ----
+implementation_plan.md
+implementation*.md
+raahnetra-project-plan.md
+task.md

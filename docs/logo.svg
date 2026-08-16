@@ -1,0 +1,49 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff8800;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff3344;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#0a0a0f"/>
+
+  <!-- Logo Mark -->
+  <g transform="translate(180, 200)">
+    <!-- Outer radar rings / eye -->
+    <circle cx="0" cy="0" r="80" fill="none" stroke="url(#grad1)" stroke-width="8" stroke-dasharray="350 150" stroke-linecap="round" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="10s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="0" cy="0" r="55" fill="none" stroke="url(#grad2)" stroke-width="6" stroke-dasharray="100 240" stroke-linecap="round" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="8s" repeatCount="indefinite" />
+    </circle>
+    <!-- Core / Eye center -->
+    <circle cx="0" cy="0" r="24" fill="url(#grad1)" filter="url(#glow)" />
+    <!-- Pulse -->
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#00d4ff" stroke-width="2">
+      <animate attributeName="r" values="24; 40; 24" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="1; 0; 1" dur="2s" repeatCount="indefinite" />
+    </circle>
+  </g>
+
+  <!-- Typography -->
+  <text x="320" y="210" font-family="'Inter', -apple-system, sans-serif" font-weight="800" font-size="72" fill="#ffffff" letter-spacing="2">CORTEXION</text>
+  <text x="325" y="245" font-family="'JetBrains Mono', monospace" font-weight="500" font-size="16" fill="#8888aa" letter-spacing="8">CONNECTED INTELLIGENCE</text>
+  
+  <!-- Subtle tech accents -->
+  <line x1="0" y1="20" x2="800" y2="20" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+  <line x1="0" y1="380" x2="800" y2="380" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+  <circle cx="20" cy="20" r="3" fill="rgba(255,255,255,0.1)" />
+  <circle cx="780" cy="380" r="3" fill="rgba(255,255,255,0.1)" />
+</svg>

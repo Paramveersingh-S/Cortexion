@@ -1,0 +1,24 @@
+{
+  "name": "cortexion-gateway",
+  "version": "1.0.0",
+  "description": "Cortexion LoRa base station gateway — serial-to-MQTT bridge",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "serialport": "^12.0.0",
+    "mqtt": "^5.10.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,74 @@
+version: '3.8'
+
+# ═══════════════════════════════════════════════════
+# Cortexion — Full Stack Development Environment
+# ═══════════════════════════════════════════════════
+# Usage: docker-compose up -d
+# Dashboard: http://localhost:3000
+# API: http://localhost:3001
+# WebSocket: ws://localhost:8081
+
+services:
+  # ── MQTT Broker ──────────────────────────────────
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: cortexion-mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+
+  # ── Gateway (LoRa → MQTT) ────────────────────────
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: cortexion-gateway
+    depends_on:
+      - mosquitto
+    environment:
+      - MQTT_URL=mqtt://mosquitto:1883
+      - SIM_PORT=9000
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+
+  # ── Backend (Express + WebSocket) ────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cortexion-backend
+    depends_on:
+      - mosquitto
+    environment:
+      - MQTT_URL=mqtt://mosquitto:1883
+      - HTTP_PORT=3001
+      - WS_PORT=8081
+      - DATABASE_PATH=/data/cortexion.db
+    ports:
+      - "3001:3001"
+      - "8081:8081"
+    volumes:
+      - backend-data:/data
+    restart: unless-stopped
+
+  # ── Web Dashboard (Next.js) ──────────────────────
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: cortexion-web
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8081
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  backend-data:

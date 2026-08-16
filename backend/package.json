@@ -1,0 +1,28 @@
+{
+  "name": "cortexion-backend",
+  "version": "1.0.0",
+  "description": "Cortexion backend — Express REST API + WebSocket + MQTT ingestion",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0",
+    "mqtt": "^5.10.0",
+    "better-sqlite3": "^11.3.0",
+    "dotenv": "^16.4.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

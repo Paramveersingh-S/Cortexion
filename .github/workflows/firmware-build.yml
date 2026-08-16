@@ -1,0 +1,60 @@
+name: Firmware Build
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'firmware/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'firmware/**'
+
+jobs:
+  build-hub:
+    name: Build Hub Firmware (ESP32)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+          key: ${{ runner.os }}-pio-hub-${{ hashFiles('firmware/hub/platformio.ini') }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PlatformIO
+        run: |
+          pip install platformio
+      - name: Build Hub Firmware
+        run: |
+          cd firmware/hub
+          pio run
+      - name: Run Hub Tests
+        run: |
+          cd firmware/hub
+          pio test -e native
+
+  build-sense:
+    name: Build Sense Firmware (ESP32-S3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+          key: ${{ runner.os }}-pio-sense-${{ hashFiles('firmware/sense/platformio.ini') }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PlatformIO
+        run: |
+          pip install platformio
+      - name: Build Sense Firmware
+        run: |
+          cd firmware/sense
+          pio run
