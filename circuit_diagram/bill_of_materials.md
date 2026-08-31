@@ -1,52 +1,39 @@
-# Vigilante Hardware Bill of Materials (BOM)
+# Vigilante Hardware Bill of Materials (Modular / Plug-and-Play)
 
-This is the complete shopping list to build the custom PCB for the Vehicle Telemetry Hub and the external Radar Sense Node.
+Since you are buying pre-assembled development boards and modules, this drastically simplifies your shopping list and eliminates the need for soldering tiny capacitors, crystals, and voltage regulators! 
 
-## 1. Microcontrollers
+## 1. Microcontrollers (Dev Boards)
 | Quantity | Component Name | Description |
 | :---: | :--- | :--- |
-| **1** | ESP32-WROOM-32 | The main hub microcontroller module (Surface mount). |
-| **1** | ESP32-S3-WROOM-1 | The sense board microcontroller module (Surface mount). |
+| **1** | ESP32 NodeMCU DevKitC V4 | Main Hub MCU. Includes built-in USB-to-UART, 3.3V regulators, and boot buttons. Just plug it in via USB! |
+| **1** | ESP32-S3 DevKitC | Sense Board MCU. Also fully assembled and ready to plug in. |
 
-## 2. OBD & CAN Interface
+## 2. Vehicle Interface (The OBD Connection)
+*Choose one of the following options based on your preference:*
+
 | Quantity | Component Name | Description |
 | :---: | :--- | :--- |
-| **1** | ELM327 | OBD-II to RS232 Interpreter IC (usually DIP-28 or SOIC-28). |
-| **1** | MCP2551 | High-Speed CAN Transceiver IC (usually DIP-8 or SOIC-8). |
-| **1** | OBD-II Connector | 16-pin Male OBD-II plug (to connect directly to the car). |
+| **Option A (Easiest)** | ELM327 Bluetooth OBD-II Dongle | A standard commercial Bluetooth OBD-II reader. Your ESP32 Hub can connect to it wirelessly via Bluetooth (Classic/BLE), meaning **zero hardwiring** to the car is required! |
+| **Option B (Wired)** | SN65HVD230 CAN Bus Module | A pre-built CAN transceiver breakout board. You wire this to the ESP32, and splice it into a generic "OBD-II Male to Open Wire" cable to connect to pins 6 and 14. |
 
-## 3. Modules & Sensors
+## 3. Sensors & Peripherals (Breakout Boards)
+*All of these should be purchased as "Breakout Boards" (pre-soldered onto a small circuit board with pins).*
+
 | Quantity | Component Name | Description |
 | :---: | :--- | :--- |
-| **1** | SX1278 LoRa Module | SPI LoRa module (Ensure you buy the frequency legal for your region: 433MHz, 868MHz, or 915MHz). |
-| **1** | 2.4" SPI TFT Display | ILI9341 or generic SPI TFT screen. |
-| **1** | MPU6050 Module | 6-DOF Accelerometer/Gyro (Buy the breakout board, it already has the required pull-up resistors and capacitors). |
-| **1** | NEO-6M GPS Module | UART GPS module (Should include a small ceramic active antenna). |
-| **1** | HLK-LD2410 | 24GHz mmWave Human Presence Radar Sensor module. |
+| **1** | SX1278 LoRa Module | SPI LoRa breakout board. Usually comes with a small spring or SMA antenna. |
+| **1** | 2.4" SPI TFT Display | ILI9341 based display module with pre-soldered header pins. |
+| **1** | MPU6050 Module | 6-DOF IMU breakout board (already contains the required I2C pull-up resistors). |
+| **1** | NEO-6M GPS Module | UART GPS breakout. Usually includes a small square ceramic active antenna. |
+| **1** | HLK-LD2410B | 24GHz mmWave Human Presence Radar Sensor (buy the one that includes header pins). |
 
-## 4. Power Supply & Logic Shifting
+## 4. Power & Prototyping
+Because the Dev Boards take 5V via USB, you don't need to build a custom 12V-to-5V regulator circuit!
+
 | Quantity | Component Name | Description |
 | :---: | :--- | :--- |
-| **1** | LM7805 or 78L05 | 12V to 5V Linear Voltage Regulator. |
-| **2** | AMS1117-3.3 | 5V to 3.3V Low Drop-Out (LDO) Regulator (One for the Main Hub, one for the Sense Board). |
-| **1** | Logic Level Shifter | 4-Channel Bi-directional Logic Level Converter (e.g. BSS138 based). To protect the ESP32 from the ELM327's 5V signals. |
-
-## 5. Passive Components (Resistors & Capacitors)
-| Quantity | Component Name | Description |
-| :---: | :--- | :--- |
-| **1** | 4.00MHz Crystal | Crystal oscillator required for the ELM327. |
-| **2** | 27pF Ceramic Capacitor | Load capacitors for the 4.00MHz crystal. |
-| **4** | 10uF Capacitor | Ceramic or Electrolytic. Used for the power supply regulators. |
-| **5** | 0.1uF Ceramic Capacitor | Used for regulator decoupling and the ESP32 EN auto-boot circuit. |
-| **2** | 10kΩ Resistor | Pull-up resistor for the ESP32 EN pin and general logic use. |
-
-## 6. Connectors & Miscellaneous
-| Quantity | Component Name | Description |
-| :---: | :--- | :--- |
-| **2** | 4-Pin JST-XH Header | Male PCB-mount headers to connect the Hub and Sense boards. |
-| **1** | 4-Pin JST-XH Cable | Pre-crimped female-to-female cable to run between the two boards. |
-| **2** | Tactile Push Button | Small SMD or Through-hole buttons for ESP32 Boot/Reset switches. |
-| **1** | LoRa Antenna | SMA or IPEX antenna matched to your SX1278 frequency. |
-
-> [!TIP]
-> **Prototyping vs PCB:** If you intend to test this on a breadboard before manufacturing the custom PCB, it is highly recommended to buy **ESP32 NodeMCU Dev Boards** instead of the bare WROOM modules. The Dev boards already contain the 3.3V regulators, boot buttons, and USB-to-UART chips, which will save you a lot of headache during initial programming and testing!
+| **1** | 12V Dual USB Car Charger | A standard car cigarette lighter USB charger. Use this to power your ESP32 Hub safely. |
+| **2** | Micro-USB or USB-C Cable | To power and program the ESP32 dev boards. Check which port your specific dev boards have! |
+| **1** | Dupont Jumper Wires Kit | A box of Male-to-Male, Male-to-Female, and Female-to-Female jumper wires for connecting the modules. |
+| **2** | Solderless Breadboards | For assembling and testing the circuit without soldering. |
+| **1** | 4-Pin JST-XH Cable (Optional) | If you still want a clean cable connection between the Hub board and the Sense board. |
