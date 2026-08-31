@@ -1,0 +1,14 @@
+// Electronic enclosure assembly
+// Base and removable lid shown in their assembled friction-fit position.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+import enclosureBase from "base.kcl"
+import enclosureLid from "lid.kcl"
+
+basePart = enclosureBase
+  |> appearance(color = "#27313b", metalness = 0, roughness = 62)
+lidPart = enclosureLid
+  |> translate(z = 18.5mm, global = true)
+  |> appearance(color = "#596a79", metalness = 0, roughness = 52)
+
+[basePart, lidPart]

@@ -1,0 +1,197 @@
+// Electronic enclosure base
+// Rounded hollow base with standoffs and centered cable openings.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+outerLength = 100mm
+outerWidth = 75mm
+outerHeight = 35mm
+wallThickness = 2mm
+floorThickness = 2mm
+cornerRadius = 5mm
+innerFloorTop = -outerHeight / 2 + floorThickness
+
+standoffDiameter = 7mm
+standoffHeight = 6mm
+standoffRootOverlap = 0.1mm
+standoffHoleDiameter = 2.4mm
+standoffHoleDepth = 5mm
+standoffX = 33mm
+standoffY = 20.5mm
+
+usbCutoutWidth = 12mm
+usbCutoutHeight = 8mm
+sensorCutoutWidth = 20mm
+sensorCutoutHeight = 10mm
+cutoutBottomZ = innerFloorTop + 2mm
+
+baseProfile = sketch(on = XY) {
+  baseBottom = line(start = [var -50mm, var -37.5mm], end = [var 50mm, var -37.5mm])
+  baseRight = line(start = [var 50mm, var -37.5mm], end = [var 50mm, var 37.5mm])
+  baseTop = line(start = [var 50mm, var 37.5mm], end = [var -50mm, var 37.5mm])
+  baseLeft = line(start = [var -50mm, var 37.5mm], end = [var -50mm, var -37.5mm])
+  coincident([baseBottom.end, baseRight.start])
+  coincident([baseRight.end, baseTop.start])
+  coincident([baseTop.end, baseLeft.start])
+  coincident([baseLeft.end, baseBottom.start])
+  horizontal(baseBottom)
+  vertical(baseRight)
+  horizontal(baseTop)
+  vertical(baseLeft)
+  horizontalDistance([ORIGIN, baseBottom.start]) == -outerLength / 2
+  verticalDistance([ORIGIN, baseBottom.start]) == -outerWidth / 2
+  distance([baseBottom.start, baseBottom.end]) == outerLength
+  distance([baseRight.start, baseRight.end]) == outerWidth
+}
+baseRegion = region(
+  segments = [
+    baseProfile.baseBottom,
+    baseProfile.baseRight
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+baseBlank = extrude(baseRegion, length = outerHeight, symmetric = true)
+baseRounded = baseBlank
+  |> fillet(
+       radius = cornerRadius,
+       tags = [
+         getCommonEdge(faces = [
+           baseRegion.tags.baseBottom,
+           baseRegion.tags.baseRight
+         ]),
+         getCommonEdge(faces = [
+           baseRegion.tags.baseRight,
+           baseRegion.tags.baseTop
+         ]),
+         getCommonEdge(faces = [
+           baseRegion.tags.baseTop,
+           baseRegion.tags.baseLeft
+         ]),
+         getCommonEdge(faces = [
+           baseRegion.tags.baseLeft,
+           baseRegion.tags.baseBottom
+         ])
+       ],
+     )
+enclosureShell = shell(baseRounded, thickness = wallThickness, faces = [END])
+
+standoffSketch = sketch(on = offsetPlane(XY, offset = innerFloorTop - standoffRootOverlap)) {
+  standoffCircle = circle(start = [var -29.5mm, var -20.5mm], center = [var -33mm, var -20.5mm])
+  horizontal([
+    standoffCircle.start,
+    standoffCircle.center
+  ])
+  horizontalDistance([ORIGIN, standoffCircle.center]) == -standoffX
+  verticalDistance([ORIGIN, standoffCircle.center]) == -standoffY
+  diameter(standoffCircle) == standoffDiameter
+}
+standoffRegion = region(segments = [standoffSketch.standoffCircle])
+standoffFrontLeft = extrude(standoffRegion, length = standoffHeight + standoffRootOverlap)
+standoffFrontRight = clone(standoffFrontLeft)
+  |> translate(x = 2 * standoffX, global = true)
+standoffRearLeft = clone(standoffFrontLeft)
+  |> translate(y = 2 * standoffY, global = true)
+standoffRearRight = clone(standoffFrontLeft)
+  |> translate(x = 2 * standoffX, y = 2 * standoffY, global = true)
+baseWithStandoffs = union([
+  enclosureShell,
+  standoffFrontLeft,
+  standoffFrontRight,
+  standoffRearLeft,
+  standoffRearRight
+])
+
+standoffHoleSketch = sketch(on = offsetPlane(XY, offset = innerFloorTop + standoffHeight)) {
+  standoffHoleCircle = circle(start = [var -31.8mm, var -20.5mm], center = [var -33mm, var -20.5mm])
+  horizontal([
+    standoffHoleCircle.start,
+    standoffHoleCircle.center
+  ])
+  horizontalDistance([ORIGIN, standoffHoleCircle.center]) == -standoffX
+  verticalDistance([ORIGIN, standoffHoleCircle.center]) == -standoffY
+  diameter(standoffHoleCircle) == standoffHoleDiameter
+}
+standoffHoleRegion = region(segments = [standoffHoleSketch.standoffHoleCircle])
+standoffHoleFrontLeft = extrude(standoffHoleRegion, length = -standoffHoleDepth)
+standoffHoleFrontRight = clone(standoffHoleFrontLeft)
+  |> translate(x = 2 * standoffX, global = true)
+standoffHoleRearLeft = clone(standoffHoleFrontLeft)
+  |> translate(y = 2 * standoffY, global = true)
+standoffHoleRearRight = clone(standoffHoleFrontLeft)
+  |> translate(x = 2 * standoffX, y = 2 * standoffY, global = true)
+
+usbCutoutSketch = sketch(on = offsetPlane(YZ, offset = -51mm)) {
+  usbBottom = line(start = [var -6mm, var -13.5mm], end = [var 6mm, var -13.5mm])
+  usbRight = line(start = [var 6mm, var -13.5mm], end = [var 6mm, var -5.5mm])
+  usbTop = line(start = [var 6mm, var -5.5mm], end = [var -6mm, var -5.5mm])
+  usbLeft = line(start = [var -6mm, var -5.5mm], end = [var -6mm, var -13.5mm])
+  coincident([usbBottom.end, usbRight.start])
+  coincident([usbRight.end, usbTop.start])
+  coincident([usbTop.end, usbLeft.start])
+  coincident([usbLeft.end, usbBottom.start])
+  horizontal(usbBottom)
+  vertical(usbRight)
+  horizontal(usbTop)
+  vertical(usbLeft)
+  horizontalDistance([ORIGIN, usbBottom.start]) == -usbCutoutWidth / 2
+  verticalDistance([ORIGIN, usbBottom.start]) == cutoutBottomZ
+  distance([usbBottom.start, usbBottom.end]) == usbCutoutWidth
+  distance([usbRight.start, usbRight.end]) == usbCutoutHeight
+}
+usbCutoutRegion = region(
+  segments = [
+    usbCutoutSketch.usbBottom,
+    usbCutoutSketch.usbRight
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+usbCutoutCutter = extrude(usbCutoutRegion, length = 4mm)
+
+sensorCutoutSketch = sketch(on = offsetPlane(YZ, offset = 47mm)) {
+  sensorBottom = line(start = [var -10mm, var -13.5mm], end = [var 10mm, var -13.5mm])
+  sensorRight = line(start = [var 10mm, var -13.5mm], end = [var 10mm, var -3.5mm])
+  sensorTop = line(start = [var 10mm, var -3.5mm], end = [var -10mm, var -3.5mm])
+  sensorLeft = line(start = [var -10mm, var -3.5mm], end = [var -10mm, var -13.5mm])
+  coincident([sensorBottom.end, sensorRight.start])
+  coincident([sensorRight.end, sensorTop.start])
+  coincident([sensorTop.end, sensorLeft.start])
+  coincident([sensorLeft.end, sensorBottom.start])
+  horizontal(sensorBottom)
+  vertical(sensorRight)
+  horizontal(sensorTop)
+  vertical(sensorLeft)
+  horizontalDistance([ORIGIN, sensorBottom.start]) == -sensorCutoutWidth / 2
+  verticalDistance([ORIGIN, sensorBottom.start]) == cutoutBottomZ
+  distance([sensorBottom.start, sensorBottom.end]) == sensorCutoutWidth
+  distance([sensorRight.start, sensorRight.end]) == sensorCutoutHeight
+}
+sensorCutoutRegion = region(
+  segments = [
+    sensorCutoutSketch.sensorBottom,
+    sensorCutoutSketch.sensorRight
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+sensorCutoutCutter = extrude(sensorCutoutRegion, length = 4mm)
+
+enclosureBaseBody = subtract(
+  baseWithStandoffs,
+  tools = [
+    standoffHoleFrontLeft,
+    standoffHoleFrontRight,
+    standoffHoleRearLeft,
+    standoffHoleRearRight,
+    usbCutoutCutter,
+    sensorCutoutCutter
+  ],
+)
+
+hide(baseProfile)
+hide(standoffSketch)
+hide(standoffHoleSketch)
+hide(usbCutoutSketch)
+hide(sensorCutoutSketch)
+
+export enclosureBase = enclosureBaseBody

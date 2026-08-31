@@ -1,0 +1,217 @@
+// Electronic enclosure lid
+// Flat rounded cover with an internal friction-fit lip and TFT window.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+outerLength = 100mm
+outerWidth = 75mm
+lidThickness = 2mm
+cornerRadius = 5mm
+lipInset = 2.2mm
+lipWallThickness = 1.2mm
+lipOuterCornerRadius = cornerRadius - lipInset
+lipInnerCornerRadius = lipOuterCornerRadius - lipWallThickness
+lipDrop = 3mm
+lipOverlap = 0.1mm
+windowLength = 49mm
+windowWidth = 36mm
+
+lidProfile = sketch(on = XY) {
+  lidBottom = line(start = [var -50mm, var -37.5mm], end = [var 50mm, var -37.5mm])
+  lidRight = line(start = [var 50mm, var -37.5mm], end = [var 50mm, var 37.5mm])
+  lidTop = line(start = [var 50mm, var 37.5mm], end = [var -50mm, var 37.5mm])
+  lidLeft = line(start = [var -50mm, var 37.5mm], end = [var -50mm, var -37.5mm])
+  coincident([lidBottom.end, lidRight.start])
+  coincident([lidRight.end, lidTop.start])
+  coincident([lidTop.end, lidLeft.start])
+  coincident([lidLeft.end, lidBottom.start])
+  horizontal(lidBottom)
+  vertical(lidRight)
+  horizontal(lidTop)
+  vertical(lidLeft)
+  horizontalDistance([ORIGIN, lidBottom.start]) == -outerLength / 2
+  verticalDistance([ORIGIN, lidBottom.start]) == -outerWidth / 2
+  distance([lidBottom.start, lidBottom.end]) == outerLength
+  distance([lidRight.start, lidRight.end]) == outerWidth
+}
+lidRegion = region(
+  segments = [
+    lidProfile.lidBottom,
+    lidProfile.lidRight
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+lidBlank = extrude(lidRegion, length = lidThickness, symmetric = true)
+lidPlate = lidBlank
+  |> fillet(
+       radius = cornerRadius,
+       tags = [
+         getCommonEdge(faces = [
+           lidRegion.tags.lidBottom,
+           lidRegion.tags.lidRight
+         ]),
+         getCommonEdge(faces = [
+           lidRegion.tags.lidRight,
+           lidRegion.tags.lidTop
+         ]),
+         getCommonEdge(faces = [
+           lidRegion.tags.lidTop,
+           lidRegion.tags.lidLeft
+         ]),
+         getCommonEdge(faces = [
+           lidRegion.tags.lidLeft,
+           lidRegion.tags.lidBottom
+         ])
+       ],
+     )
+
+lipOuterProfile = sketch(on = offsetPlane(XY, offset = -1mm - lipDrop)) {
+  lipOuterBottom = line(start = [var -47.8mm, var -35.3mm], end = [var 47.8mm, var -35.3mm])
+  lipOuterRight = line(start = [var 47.8mm, var -35.3mm], end = [var 47.8mm, var 35.3mm])
+  lipOuterTop = line(start = [var 47.8mm, var 35.3mm], end = [var -47.8mm, var 35.3mm])
+  lipOuterLeft = line(start = [var -47.8mm, var 35.3mm], end = [var -47.8mm, var -35.3mm])
+  coincident([
+    lipOuterBottom.end,
+    lipOuterRight.start
+  ])
+  coincident([lipOuterRight.end, lipOuterTop.start])
+  coincident([lipOuterTop.end, lipOuterLeft.start])
+  coincident([lipOuterLeft.end, lipOuterBottom.start])
+  horizontal(lipOuterBottom)
+  vertical(lipOuterRight)
+  horizontal(lipOuterTop)
+  vertical(lipOuterLeft)
+  horizontalDistance([ORIGIN, lipOuterBottom.start]) == -outerLength / 2 + lipInset
+  verticalDistance([ORIGIN, lipOuterBottom.start]) == -outerWidth / 2 + lipInset
+  distance([
+  lipOuterBottom.start,
+  lipOuterBottom.end
+]) == outerLength - (2 * lipInset)
+  distance([lipOuterRight.start, lipOuterRight.end]) == outerWidth - (2 * lipInset)
+}
+lipOuterRegion = region(
+  segments = [
+    lipOuterProfile.lipOuterBottom,
+    lipOuterProfile.lipOuterRight
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+lipOuterBlank = extrude(lipOuterRegion, length = lipDrop + lipOverlap)
+lipOuter = lipOuterBlank
+  |> fillet(
+       radius = lipOuterCornerRadius,
+       tags = [
+         getCommonEdge(faces = [
+           lipOuterRegion.tags.lipOuterBottom,
+           lipOuterRegion.tags.lipOuterRight
+         ]),
+         getCommonEdge(faces = [
+           lipOuterRegion.tags.lipOuterRight,
+           lipOuterRegion.tags.lipOuterTop
+         ]),
+         getCommonEdge(faces = [
+           lipOuterRegion.tags.lipOuterTop,
+           lipOuterRegion.tags.lipOuterLeft
+         ]),
+         getCommonEdge(faces = [
+           lipOuterRegion.tags.lipOuterLeft,
+           lipOuterRegion.tags.lipOuterBottom
+         ])
+       ],
+     )
+
+lipInnerProfile = sketch(on = offsetPlane(XY, offset = -1mm - lipDrop - lipOverlap)) {
+  lipInnerBottom = line(start = [var -46.6mm, var -34.1mm], end = [var 46.6mm, var -34.1mm])
+  lipInnerRight = line(start = [var 46.6mm, var -34.1mm], end = [var 46.6mm, var 34.1mm])
+  lipInnerTop = line(start = [var 46.6mm, var 34.1mm], end = [var -46.6mm, var 34.1mm])
+  lipInnerLeft = line(start = [var -46.6mm, var 34.1mm], end = [var -46.6mm, var -34.1mm])
+  coincident([
+    lipInnerBottom.end,
+    lipInnerRight.start
+  ])
+  coincident([lipInnerRight.end, lipInnerTop.start])
+  coincident([lipInnerTop.end, lipInnerLeft.start])
+  coincident([lipInnerLeft.end, lipInnerBottom.start])
+  horizontal(lipInnerBottom)
+  vertical(lipInnerRight)
+  horizontal(lipInnerTop)
+  vertical(lipInnerLeft)
+  horizontalDistance([ORIGIN, lipInnerBottom.start]) == -outerLength / 2 + lipInset + lipWallThickness
+  verticalDistance([ORIGIN, lipInnerBottom.start]) == -outerWidth / 2 + lipInset + lipWallThickness
+  distance([
+  lipInnerBottom.start,
+  lipInnerBottom.end
+]) == outerLength - (2 * lipInset) - (2 * lipWallThickness)
+  distance([lipInnerRight.start, lipInnerRight.end]) == outerWidth - (2 * lipInset) - (2 * lipWallThickness)
+}
+lipInnerRegion = region(
+  segments = [
+    lipInnerProfile.lipInnerBottom,
+    lipInnerProfile.lipInnerRight
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+lipInnerBlank = extrude(lipInnerRegion, length = lipDrop + 2 * lipOverlap)
+lipInnerCutter = lipInnerBlank
+  |> fillet(
+       radius = lipInnerCornerRadius,
+       tags = [
+         getCommonEdge(faces = [
+           lipInnerRegion.tags.lipInnerBottom,
+           lipInnerRegion.tags.lipInnerRight
+         ]),
+         getCommonEdge(faces = [
+           lipInnerRegion.tags.lipInnerRight,
+           lipInnerRegion.tags.lipInnerTop
+         ]),
+         getCommonEdge(faces = [
+           lipInnerRegion.tags.lipInnerTop,
+           lipInnerRegion.tags.lipInnerLeft
+         ]),
+         getCommonEdge(faces = [
+           lipInnerRegion.tags.lipInnerLeft,
+           lipInnerRegion.tags.lipInnerBottom
+         ])
+       ],
+     )
+lipRing = subtract(lipOuter, tools = [lipInnerCutter])
+lidWithLip = union([lidPlate, lipRing])
+
+windowSketch = sketch(on = offsetPlane(XY, offset = -2mm)) {
+  windowBottom = line(start = [var -24.5mm, var -18mm], end = [var 24.5mm, var -18mm])
+  windowRight = line(start = [var 24.5mm, var -18mm], end = [var 24.5mm, var 18mm])
+  windowTop = line(start = [var 24.5mm, var 18mm], end = [var -24.5mm, var 18mm])
+  windowLeft = line(start = [var -24.5mm, var 18mm], end = [var -24.5mm, var -18mm])
+  coincident([windowBottom.end, windowRight.start])
+  coincident([windowRight.end, windowTop.start])
+  coincident([windowTop.end, windowLeft.start])
+  coincident([windowLeft.end, windowBottom.start])
+  horizontal(windowBottom)
+  vertical(windowRight)
+  horizontal(windowTop)
+  vertical(windowLeft)
+  horizontalDistance([ORIGIN, windowBottom.start]) == -windowLength / 2
+  verticalDistance([ORIGIN, windowBottom.start]) == -windowWidth / 2
+  distance([windowBottom.start, windowBottom.end]) == windowLength
+  distance([windowRight.start, windowRight.end]) == windowWidth
+}
+windowRegion = region(
+  segments = [
+    windowSketch.windowBottom,
+    windowSketch.windowRight
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+windowCutter = extrude(windowRegion, length = 4mm)
+
+enclosureLidBody = subtract(lidWithLip, tools = [windowCutter])
+
+hide(lidProfile)
+hide(lipOuterProfile)
+hide(lipInnerProfile)
+hide(windowSketch)
+
+export enclosureLid = enclosureLidBody

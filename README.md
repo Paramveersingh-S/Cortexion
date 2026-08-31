@@ -189,6 +189,41 @@ cd simulator && python serial_emitter.py --scenario normal_drive --loop
 
 ---
 
+## 📦 3D Printed Hardware Enclosure
+
+The complete hardware system (ESP32 Hub, TFT Display, LoRa, OBD-II interface) is housed in a custom-designed, 3D-printable enclosure. You can find the raw OpenSCAD and output files in the `3d_models` directory.
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="3d_models/images/isometric_view.png" alt="Isometric View" width="400" />
+        <br />
+        <em>Isometric View</em>
+      </td>
+      <td align="center">
+        <img src="3d_models/images/xray_view.png" alt="X-Ray View" width="400" />
+        <br />
+        <em>Transparent X-Ray View showing internal PCB standoffs</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="3d_models/images/top_down.png" alt="Top View" width="400" />
+        <br />
+        <em>Top Down View (showing 2.4" TFT Display cutout)</em>
+      </td>
+      <td align="center">
+        <img src="3d_models/images/side_profile.png" alt="Side Profile" width="400" />
+        <br />
+        <em>Side Profile (showing USB and OBD/Sensor cable cutouts)</em>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
 ## 🛠️ Hardware Setup
 
 For full deployment instructions for flashing the ESP32 Hub and Sense nodes, refer to the [Setup Guide](docs/setup-guide.md).

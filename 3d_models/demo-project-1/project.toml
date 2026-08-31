@@ -1,0 +1,10 @@
+title = "demo-project-1"
+default_file = "main.kcl"
+
+[settings.app]
+[settings.meta]
+id = "185497ce-3f48-48a5-bf2b-fecb681edeec"
+
+[settings.modeling]
+[cloud."zoo.dev"]
+project_id = "98c371f3-e2c7-4ae8-ae84-6e356198d64f"
