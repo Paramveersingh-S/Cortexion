@@ -52,12 +52,10 @@ graph TB
         HUB -->|SPI| TFT["TFT Display<br>Driver Alerts"]
     end
 
-    subgraph MESH["LoRa V2V Mesh"]
-        LORA <-->|"21-byte beacon<br>1-2 Hz"| BASE["Base Station<br>LoRa Receiver"]
-    end
+    LORA <-->|"LoRa V2V Mesh<br>21-byte beacon (1-2 Hz)"| BASE
 
     subgraph SERVER["Base Station"]
-        BASE -->|Serial| GW["Node.js Gateway<br>Serial to MQTT"]
+        BASE["Base Station<br>LoRa Receiver"] -->|Serial| GW["Node.js Gateway<br>Serial to MQTT"]
         GW -->|MQTT| BROKER["Mosquitto"]
         BROKER --> BE["Express Backend<br>REST + WebSocket"]
         BE --> DB[("SQLite/Postgres")]
@@ -65,11 +63,12 @@ graph TB
     end
 
     subgraph DASH["Dashboard"]
-        BE -->|WebSocket| WEB["Next.js App<br>Leaflet Maps<br>Real-time Charts"]
+        WEB["Next.js App<br>Leaflet Maps<br>Real-time Charts"]
     end
+    
+    BE -->|WebSocket| WEB
 
     style VEH fill:#1a1a2e,stroke:#00d4ff,color:#fff
-    style MESH fill:#16213e,stroke:#0066ff,color:#fff
     style SERVER fill:#0f3460,stroke:#00d4ff,color:#fff
     style DASH fill:#1a1a2e,stroke:#00d4ff,color:#fff
 ```
