@@ -23,6 +23,7 @@ import { insertTelemetry, insertAlert, getVehicleHistory,
          insertMmWaveReading, getMmWaveHistory } from './db.js';
 import { computeHazardLevel } from './hazard-fusion.js';
 import { CongestionEstimator, computeSegmentId } from './congestion-estimator.js';
+import { otaRouter } from './ota-server.js';
 
 const HTTP_PORT = parseInt(process.env.HTTP_PORT || '3001');
 const WS_PORT = parseInt(process.env.WS_PORT || '8081');
@@ -39,6 +40,9 @@ const app = express();
 app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
+
+// OTA Firmware Updates
+app.use('/api/ota', otaRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

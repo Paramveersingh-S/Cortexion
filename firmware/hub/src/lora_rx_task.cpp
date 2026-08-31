@@ -11,8 +11,10 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <LoRa.h>
+#include <mbedtls/aes.h>
 #include "packet.h"
 #include "pins.h"
+#include "config.h"
 
 extern QueueHandle_t loraRxQueue;
 extern SemaphoreHandle_t spiBusMutex;
@@ -36,18 +38,37 @@ void loraRxTask(void* pv) {
     if (xSemaphoreTake(spiBusMutex, pdMS_TO_TICKS(50))) {
       packetSize = LoRa.parsePacket();
 
-      if (packetSize == sizeof(V2VBeacon)) {
-        V2VBeacon beacon;
-        uint8_t* buf = reinterpret_cast<uint8_t*>(&beacon);
+      if (packetSize == V2V_ENCRYPTED_SIZE) {
+        uint8_t nonce[V2V_NONCE_SIZE];
+        uint8_t encrypted_payload[sizeof(V2VBeacon)];
 
-        for (int i = 0; i < packetSize && LoRa.available(); i++) {
-          buf[i] = LoRa.read();
+        for (int i = 0; i < V2V_NONCE_SIZE && LoRa.available(); i++) {
+          nonce[i] = LoRa.read();
+        }
+        for (int i = 0; i < sizeof(V2VBeacon) && LoRa.available(); i++) {
+          encrypted_payload[i] = LoRa.read();
         }
 
         int rssi = LoRa.packetRssi();
         float snr = LoRa.packetSnr();
 
         xSemaphoreGive(spiBusMutex);
+
+        // ── AES-128-CTR Decryption ─────────────────────
+        V2VBeacon beacon;
+        mbedtls_aes_context aes;
+        mbedtls_aes_init(&aes);
+        mbedtls_aes_setkey_enc(&aes, LORA_AES_KEY, 128);
+
+        uint8_t stream_block[16] = {0};
+        size_t nc_off = 0;
+        uint8_t nonce_counter[16] = {0};
+        memcpy(nonce_counter, nonce, V2V_NONCE_SIZE);
+
+        mbedtls_aes_crypt_ctr(&aes, sizeof(V2VBeacon), &nc_off, nonce_counter, stream_block, 
+                              encrypted_payload, reinterpret_cast<uint8_t*>(&beacon));
+        mbedtls_aes_free(&aes);
+        // ──────────────────────────────────────────────
 
         // Validate beacon
         if (!beacon_validate(beacon)) {
@@ -82,9 +103,9 @@ void loraRxTask(void* pv) {
       } else {
         xSemaphoreGive(spiBusMutex);
 
-        if (packetSize > 0 && packetSize != sizeof(V2VBeacon)) {
+        if (packetSize > 0 && packetSize != V2V_ENCRYPTED_SIZE) {
           Serial.printf("[LORA-RX] Unexpected packet size: %d (expected %d)\n",
-                        packetSize, (int)sizeof(V2VBeacon));
+                        packetSize, (int)V2V_ENCRYPTED_SIZE);
         }
       }
     }

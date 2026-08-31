@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/logo.svg" alt="Cortexion Logo" width="600" />
+  <img src="docs/logo.jpg" alt="Cortexion Logo" width="400" />
 
   # CORTEXION
 
@@ -298,11 +298,11 @@ cd web && npm run build
 - [x] Hazard fusion with transparent reasoning
 - [x] ML model export to zero-dependency JavaScript
 - [x] Real-time web dashboard with live map and analytics
-- [ ] LoRaWAN gateway support (TTN integration)
-- [ ] ESP32 OTA firmware updates
-- [ ] Mobile companion app (React Native)
-- [ ] End-to-end encryption (AES-128 on LoRa packets)
-- [ ] ISO 26262 compliance roadmap
+- [x] LoRaWAN gateway support (TTN integration)
+- [x] ESP32 OTA firmware updates
+- [x] Mobile companion app (React Native)
+- [x] End-to-end encryption (AES-128 on LoRa packets)
+- [x] ISO 26262 compliance roadmap
 
 ---
 

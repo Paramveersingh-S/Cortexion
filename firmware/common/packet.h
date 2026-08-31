@@ -53,6 +53,9 @@ struct V2VBeacon {
 // Compile-time size check — catches accidental struct growth immediately
 static_assert(sizeof(V2VBeacon) == 21, "V2VBeacon size changed — check wire protocol");
 
+#define V2V_NONCE_SIZE 8
+#define V2V_ENCRYPTED_SIZE (sizeof(V2VBeacon) + V2V_NONCE_SIZE)
+
 // ── Beacon Utilities ────────────────────────────────────────────
 
 /**

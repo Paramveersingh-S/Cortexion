@@ -11,8 +11,10 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <LoRa.h>
+#include <mbedtls/aes.h>
 #include "packet.h"
 #include "pins.h"
+#include "config.h"
 
 extern QueueHandle_t loraTxQueue;
 extern SemaphoreHandle_t spiBusMutex;
@@ -147,8 +149,32 @@ void loraTxTask(void* pv) {
         LoRa.setSpreadingFactor(sf);
 
         uint32_t txStart = millis();
+
+        // ── AES-128-CTR Encryption ─────────────────────
+        uint8_t nonce[V2V_NONCE_SIZE];
+        uint32_t r1 = esp_random();
+        uint32_t r2 = esp_random();
+        memcpy(nonce, &r1, 4);
+        memcpy(nonce + 4, &r2, 4);
+
+        mbedtls_aes_context aes;
+        mbedtls_aes_init(&aes);
+        mbedtls_aes_setkey_enc(&aes, LORA_AES_KEY, 128);
+
+        uint8_t stream_block[16] = {0};
+        size_t nc_off = 0;
+        uint8_t nonce_counter[16] = {0};
+        memcpy(nonce_counter, nonce, 8);
+
+        uint8_t encrypted_payload[sizeof(V2VBeacon)];
+        mbedtls_aes_crypt_ctr(&aes, sizeof(V2VBeacon), &nc_off, nonce_counter, stream_block, 
+                              reinterpret_cast<uint8_t*>(&beacon), encrypted_payload);
+        mbedtls_aes_free(&aes);
+        // ──────────────────────────────────────────────
+
         LoRa.beginPacket();
-        LoRa.write(reinterpret_cast<uint8_t*>(&beacon), sizeof(V2VBeacon));
+        LoRa.write(nonce, V2V_NONCE_SIZE);
+        LoRa.write(encrypted_payload, sizeof(V2VBeacon));
         LoRa.endPacket();
         uint32_t actualAirtime = millis() - txStart;
 

@@ -62,4 +62,12 @@
 // Uncomment and fill in to enable HMAC on beacon packets
 // #define HMAC_KEY           {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07}
 
+// ── End-to-End Encryption (AES-128-CTR) ────────────────────────
+// 16-byte pre-shared key for fleet encryption.
+// Change this for your production fleet!
+const uint8_t LORA_AES_KEY[16] = {
+  0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+  0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c
+};
+
 #endif // CORTEXION_CONFIG_H
