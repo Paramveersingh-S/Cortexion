@@ -43,29 +43,29 @@ Cortexion is built across four major layers:
 
 ```mermaid
 graph TB
-    subgraph VEH["🚗 Vehicle Module (×2)"]
-        ELM["ELM327 WiFi<br/>OBD-II Dongle"] -->|TCP/WiFi| HUB["ESP32 Hub<br/>7 FreeRTOS Tasks<br/>Dual-Core"]
+    subgraph VEH["Vehicle Module x2"]
+        ELM["ELM327 WiFi<br>OBD-II Dongle"] -->|TCP/WiFi| HUB["ESP32 Hub<br>7 FreeRTOS Tasks<br>Dual-Core"]
         GPS["NEO-6M GPS"] -->|UART| HUB
         IMU["MPU6050 IMU"] -->|I2C| HUB
-        SENSE["ESP32-S3 Sense<br/>RuView WiFi CSI<br/>+ mmWave Radar"] -->|UART| HUB
-        HUB -->|SPI| LORA["SX1278 LoRa<br/>433MHz / IN865"]
-        HUB -->|SPI| TFT["TFT Display<br/>Driver Alerts"]
+        SENSE["ESP32-S3 Sense<br>RuView WiFi CSI<br>+ mmWave Radar"] -->|UART| HUB
+        HUB -->|SPI| LORA["SX1278 LoRa<br>433MHz / IN865"]
+        HUB -->|SPI| TFT["TFT Display<br>Driver Alerts"]
     end
 
-    subgraph MESH["📡 LoRa V2V Mesh"]
-        LORA <-->|"21-byte beacon<br/>1-2 Hz"| BASE["Base Station<br/>LoRa Receiver"]
+    subgraph MESH["LoRa V2V Mesh"]
+        LORA <-->|"21-byte beacon<br>1-2 Hz"| BASE["Base Station<br>LoRa Receiver"]
     end
 
-    subgraph SERVER["💻 Base Station"]
-        BASE -->|Serial| GW["Node.js Gateway<br/>Serial → MQTT"]
+    subgraph SERVER["Base Station"]
+        BASE -->|Serial| GW["Node.js Gateway<br>Serial to MQTT"]
         GW -->|MQTT| BROKER["Mosquitto"]
-        BROKER --> BE["Express Backend<br/>REST + WebSocket"]
+        BROKER --> BE["Express Backend<br>REST + WebSocket"]
         BE --> DB[("SQLite/Postgres")]
         ML["ML Pipeline"] -.->|"m2cgen export"| BE
     end
 
-    subgraph DASH["🖥️ Dashboard"]
-        BE -->|WebSocket| WEB["Next.js App<br/>Leaflet Maps<br/>Real-time Charts"]
+    subgraph DASH["Dashboard"]
+        BE -->|WebSocket| WEB["Next.js App<br>Leaflet Maps<br>Real-time Charts"]
     end
 
     style VEH fill:#1a1a2e,stroke:#00d4ff,color:#fff
@@ -97,6 +97,34 @@ sequenceDiagram
     BE->>WS: Broadcast
     WS->>UI: Real-time Update
 ```
+
+---
+
+## 🖥️ Dashboard Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" colspan="2">
+        <img src="docs/screenshots/dashboard.png" alt="Fleet Command Dashboard" width="900" />
+        <br />
+        <em><strong>Fleet Command Dashboard</strong> — Real-time map with live vehicle tracking, driving scores, hazard alerts, and cabin status. WebSocket-driven updates at 2 Hz.</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/screenshots/analytics.png" alt="Fleet Analytics" width="450" />
+        <br />
+        <em><strong>Fleet Analytics</strong> — KPI cards, alert distribution by severity, and top risk factor analysis across the entire fleet.</em>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/cabin_monitor.png" alt="Cabin Presence Monitor" width="450" />
+        <br />
+        <em><strong>Cabin Presence Monitor</strong> — mmWave 24GHz radar sweep, occupant detection, gate energy visualization, and real-time motion classification.</em>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 

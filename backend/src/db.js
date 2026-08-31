@@ -38,6 +38,8 @@ function initSchema() {
       hazard_flags INTEGER,
       cabin_status TEXT,
       cabin_status_code INTEGER,
+      engine_temp REAL,
+      battery_voltage REAL,
       timestamp_ms INTEGER,
       received_at TEXT DEFAULT (datetime('now'))
     );
@@ -88,15 +90,15 @@ export function insertTelemetry(beacon) {
   const stmt = getDb().prepare(`
     INSERT INTO vehicle_telemetry
       (vehicle_id, lat, lon, speed_kmh, heading_deg, driving_score,
-       hazard_flags, cabin_status, cabin_status_code, timestamp_ms)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       hazard_flags, cabin_status, cabin_status_code, engine_temp, battery_voltage, timestamp_ms)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   return stmt.run(
     beacon.vehicleId, beacon.lat, beacon.lon,
     beacon.speedKmh, beacon.headingDeg, beacon.drivingScore,
     beacon.hazardFlags, beacon.cabinStatus, beacon.cabinStatusCode,
-    beacon.timestampMs
+    beacon.engineTemp, beacon.batteryVoltage, beacon.timestampMs
   );
 }
 

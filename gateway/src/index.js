@@ -62,19 +62,19 @@ try {
   });
 } catch (err) {
   console.error(`[GATEWAY] Failed to open serial port: ${err.message}`);
-  console.log('[GATEWAY] Running in simulation mode — use the simulator to inject packets');
-  // In simulation mode, we'll listen for TCP connections instead
-  import('net').then(({ createServer }) => {
-    const server = createServer((socket) => {
-      console.log('[GATEWAY] Simulator connected via TCP');
-      processStream(socket);
-    });
-    const tcpPort = parseInt(process.env.SIM_PORT || '9000');
-    server.listen(tcpPort, () => {
-      console.log(`[GATEWAY] TCP simulator listener on port ${tcpPort}`);
-    });
-  });
 }
+
+const tcpPort = parseInt(process.env.SIM_PORT || '9000');
+console.log('[GATEWAY] Running in simulation mode — use the simulator to inject packets');
+import('net').then(({ createServer }) => {
+  const server = createServer((socket) => {
+    console.log('[GATEWAY] Simulator connected via TCP');
+    processStream(socket);
+  });
+  server.listen(tcpPort, () => {
+    console.log(`[GATEWAY] TCP simulator listener on port ${tcpPort}`);
+  });
+});
 
 // ── Stream Processing ───────────────────────────────────────────
 function processStream(stream) {
@@ -108,6 +108,10 @@ function processStream(stream) {
       }
 
       stats.packetsValid++;
+
+      // Inject simulated engine temp and battery voltage for OBD data
+      beacon.engineTemp = Math.round((85 + (Math.random() * 10 - 5)) * 10) / 10; // 80 to 90 C
+      beacon.batteryVoltage = Math.round((13.5 + (Math.random() * 1.0 - 0.5)) * 10) / 10; // 13.0 to 14.0 V
 
       // Publish to MQTT
       const topic = `v2v/${beacon.vehicleId}/beacon`;

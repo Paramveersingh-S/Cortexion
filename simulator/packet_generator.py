@@ -77,7 +77,7 @@ def build_beacon(
         min(100, max(0, driving_score)),
         hazard_flags,
         cabin_status,
-        timestamp_ms,
+        timestamp_ms & 0xFFFFFFFF,
     )
 
     # Append CRC

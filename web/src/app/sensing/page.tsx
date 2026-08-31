@@ -6,6 +6,7 @@ import GateEnergyChart from '@/components/GateEnergyChart';
 import EnergyHeatmap from '@/components/EnergyHeatmap';
 import PresenceIndicator from '@/components/PresenceIndicator';
 import Link from 'next/link';
+import { Radio, Shield, Activity } from 'lucide-react';
 
 // Dynamically import RadarSweep to avoid SSR issues with canvas
 const RadarSweep = dynamic(() => import('@/components/RadarSweep'), { ssr: false });
@@ -112,27 +113,40 @@ export default function SensingPage() {
       {/* Navigation */}
       <nav className="dashboard-nav">
         <div className="nav-brand">
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="10" stroke="url(#grad2)" strokeWidth="2"/>
               <path d="M8 12h8M12 8v8" stroke="url(#grad2)" strokeWidth="2" strokeLinecap="round"/>
               <defs><linearGradient id="grad2" x1="0" y1="0" x2="24" y2="24">
-                <stop stopColor="#0066ff"/><stop offset="1" stopColor="#00d4ff"/>
+                <stop stopColor="#0070ff"/><stop offset="1" stopColor="#00c8ff"/>
               </linearGradient></defs>
             </svg>
-            <span>CORTEXION</span>
+            <span style={{ color: '#fff', letterSpacing: '1.5px', fontSize: '1.05rem' }}>CORTEXION</span>
           </Link>
-          <span style={{ color: 'var(--accent-orange)', fontSize: '0.75rem', fontWeight: 600, marginLeft: '8px',
-            padding: '2px 8px', background: 'rgba(255,136,0,0.1)', borderRadius: '12px', border: '1px solid rgba(255,136,0,0.2)' }}>
-            SENSING
+          <span style={{
+            color: 'var(--accent-teal)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '2px',
+            padding: '3px 10px', background: 'rgba(0, 212, 170, 0.08)', borderRadius: 'var(--radius-sm)',
+            border: '1px solid rgba(0, 212, 170, 0.15)', fontFamily: 'var(--font-mono)'
+          }}>
+            CABIN MONITOR
           </span>
         </div>
+
+        <div style={{ display: 'flex', gap: '4px', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+          <Link href="/" style={{ padding: '8px 18px', background: 'transparent', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.5px', transition: 'all 0.2s' }}>Dashboard</Link>
+          <Link href="/analytics" style={{ padding: '8px 18px', background: 'transparent', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.5px', transition: 'all 0.2s' }}>Analytics</Link>
+          <Link href="/sensing" style={{ padding: '8px 18px', background: 'rgba(0, 200, 255, 0.08)', border: '1px solid rgba(0, 200, 255, 0.15)', borderRadius: 'var(--radius-sm)', color: 'var(--accent-cyan)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.5px' }}>Cabin Monitor</Link>
+        </div>
+
         <div className="nav-status">
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            mmWave 24GHz • {frameCount} frames
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)' }}>
+            mmWave 24GHz
+          </span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)' }}>
+            {frameCount} frames
           </span>
           <div className={`status-dot ${wsStatus === 'connected' ? '' : wsStatus === 'connecting' ? 'warning' : 'offline'}`} />
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)' }}>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
             {wsStatus.toUpperCase()}
           </span>
         </div>
@@ -154,11 +168,14 @@ export default function SensingPage() {
 
         {/* Side Panel */}
         <div className="sensing-panel">
-          {/* Presence */}
+          {/* Occupant Status */}
           <div className="glass-card" style={{ padding: 'var(--space-md)' }}>
             <div className="section-header">
-              <span className="section-title">Presence</span>
-              <span style={{ fontSize: '0.6rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)' }}>
+              <span className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Shield size={12} color="var(--accent-teal)" />
+                Occupant Status
+              </span>
+              <span style={{ fontSize: '0.55rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
                 V{data.vehicleId || '—'}
               </span>
             </div>
@@ -173,12 +190,15 @@ export default function SensingPage() {
           {/* Zone Occupancy */}
           <div className="glass-card" style={{ padding: 'var(--space-md)' }}>
             <div className="section-header">
-              <span className="section-title">Zone</span>
+              <span className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Radio size={12} color="var(--accent-cyan)" />
+                Detection Zone
+              </span>
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '12px', fontFamily: 'var(--font-mono)' }}>
               {zoneLabel}
             </div>
-            <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', gap: '4px' }}>
               {['Near', 'Mid', 'Far'].map((zone, zi) => {
                 const gateStart = zi * 5;
                 const gateEnd = Math.min(gateStart + 5, 16);
@@ -186,11 +206,13 @@ export default function SensingPage() {
                 const active = zoneMax > 100;
                 return (
                   <div key={zone} style={{
-                    flex: 1, padding: '6px 8px', borderRadius: '8px', textAlign: 'center',
-                    fontSize: '0.7rem', fontWeight: 600,
-                    background: active ? 'rgba(0, 212, 255, 0.12)' : 'rgba(255,255,255,0.02)',
+                    flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)', textAlign: 'center',
+                    fontSize: '0.65rem', fontWeight: 700, letterSpacing: '1px',
+                    fontFamily: 'var(--font-mono)',
+                    background: active ? 'rgba(0, 200, 255, 0.08)' : 'rgba(255,255,255,0.015)',
                     color: active ? 'var(--accent-cyan)' : 'var(--text-dimmed)',
-                    border: active ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
+                    border: active ? '1px solid rgba(0,200,255,0.15)' : '1px solid rgba(255,255,255,0.03)',
+                    transition: 'all 0.3s ease',
                   }}>
                     {zone}
                   </div>
@@ -202,8 +224,11 @@ export default function SensingPage() {
           {/* Gate Energy */}
           <div className="glass-card" style={{ padding: 'var(--space-md)' }}>
             <div className="section-header">
-              <span className="section-title">Gate Energy</span>
-              <span style={{ fontSize: '0.6rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)' }}>
+              <span className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Activity size={12} color="var(--accent-orange)" />
+                Gate Energy
+              </span>
+              <span style={{ fontSize: '0.55rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
                 16 gates × 0.7m
               </span>
             </div>
@@ -213,7 +238,7 @@ export default function SensingPage() {
           {/* Sensor Info */}
           <div className="glass-card" style={{ padding: 'var(--space-md)' }}>
             <div className="section-header">
-              <span className="section-title">Sensor</span>
+              <span className="section-title">Sensor Hardware</span>
             </div>
             <div className="sensor-info-grid">
               <div className="sensor-info-item">
