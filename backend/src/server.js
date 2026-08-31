@@ -21,7 +21,7 @@ import { insertTelemetry, insertAlert, getVehicleHistory,
          getLatestByVehicle, getAllVehiclesLatest,
          getAlerts, getAlertStats,
          insertMmWaveReading, getMmWaveHistory } from './db.js';
-import { computeHazardLevel } from './hazard-fusion.js';
+import { computeHazardLevel, evaluateMLSeverity } from './hazard-fusion.js';
 import { CongestionEstimator, computeSegmentId } from './congestion-estimator.js';
 import { otaRouter } from './ota-server.js';
 
@@ -200,6 +200,14 @@ mqttClient.on('message', async (topic, payload) => {
 
     // Store in memory
     vehicleState.set(beacon.vehicleId, beacon);
+    
+    if (!global.vehicleSpeedHistory) {
+      global.vehicleSpeedHistory = new Map();
+    }
+    const history = global.vehicleSpeedHistory.get(beacon.vehicleId) || [];
+    history.push(beacon.speedKmh);
+    if (history.length > 5) history.shift();
+    global.vehicleSpeedHistory.set(beacon.vehicleId, history);
 
     // Persist to database (don't let DB errors kill the live pipeline)
     try {
@@ -224,15 +232,29 @@ mqttClient.on('message', async (topic, payload) => {
     if (peer && beacon.lat && beacon.lon && peer.lat && peer.lon) {
       peerDistance = haversineDistance(beacon.lat, beacon.lon, peer.lat, peer.lon);
     }
+    
+    // Evaluate ML severity based on speed context (rolling variance, jerk)
+    const mlSeverity = evaluateMLSeverity(history);
+    
+    // If ML determines harsh braking context, modify the beacon score (simulate edge refinement)
+    let finalScore = beacon.drivingScore;
+    if (mlSeverity && mlSeverity.isHarsh && beacon.drivingScore > 50) {
+        finalScore = Math.max(0, beacon.drivingScore - 20); // Penalize score
+    }
 
     const hazard = computeHazardLevel({
-      ownScore: beacon.drivingScore,
+      ownScore: finalScore,
       ownSpeed: beacon.speedKmh,
       ownHazards: beacon.hazards || {},
       cabinStatus: beacon.cabinStatus,
       peer,
       peerDistance,
     });
+    
+    if (mlSeverity) {
+        hazard.mlRefined = true;
+        hazard.mlSeverityProb = mlSeverity.probHarsh;
+    }
 
     // Log alerts for significant hazards
     if (hazard.level !== 'low') {

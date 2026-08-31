@@ -52,7 +52,7 @@ services:
       - "3001:3001"
       - "8081:8081"
     volumes:
-      - backend-data:/data
+      - ./backend/data:/data
     restart: unless-stopped
 
   # ── Web Dashboard (Next.js) ──────────────────────
@@ -69,6 +69,3 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
-
-volumes:
-  backend-data:

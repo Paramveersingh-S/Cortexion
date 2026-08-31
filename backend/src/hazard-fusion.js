@@ -103,3 +103,38 @@ export function computeHazardLevel({
 
   return { level, score, reasons };
 }
+
+/**
+ * Feeds recent telemetry into the ML Event Severity Model to refine
+ * hazard evaluation based on context, reducing false positives from sensor noise.
+ */
+import { score as predictSeverity } from './severity-model.js';
+
+export function evaluateMLSeverity(speedHistoryKmh) {
+    if (!speedHistoryKmh || speedHistoryKmh.length < 5) return null;
+    
+    // Calculate basic features from the last 5 seconds (assuming ~1Hz beacons)
+    const speeds = speedHistoryKmh.slice(-5);
+    const dt = 1.0; // Assume 1s intervals for simplicity in this demo integration
+    
+    const accel1 = (speeds[1] - speeds[0]) / dt;
+    const accel2 = (speeds[2] - speeds[1]) / dt;
+    const accel3 = (speeds[3] - speeds[2]) / dt;
+    const accel4 = (speeds[4] - speeds[3]) / dt;
+    
+    const jerk = (accel4 - accel3) / dt;
+    
+    const accels = [accel1, accel2, accel3, accel4];
+    const accelMean = accels.reduce((a,b)=>a+b, 0) / 4;
+    const accelVar = accels.reduce((a,b)=>a + Math.pow(b - accelMean, 2), 0) / 4;
+    const accelRollStd = Math.sqrt(accelVar);
+    
+    const speedMean = speeds.reduce((a,b)=>a+b, 0) / 5;
+    
+    // Input format: [accel_kmh_s, jerk, rpm_delta, throttle_delta, accel_roll_std, speed_roll_mean]
+    // RPM/Throttle omitted in this basic integration as they aren't always available over LoRa
+    const input = [accel4, jerk, 0, 0, accelRollStd, speedMean];
+    
+    const [probNormal, probHarsh] = predictSeverity(input);
+    return { probHarsh, isHarsh: probHarsh > 0.5, features: { accel: accel4, jerk, accelRollStd } };
+}
