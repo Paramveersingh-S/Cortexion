@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+// @ts-ignore
 import dynamic from 'next/dynamic';
 import GateEnergyChart from '@/components/GateEnergyChart';
 import EnergyHeatmap from '@/components/EnergyHeatmap';

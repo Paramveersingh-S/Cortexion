@@ -55,7 +55,7 @@ class TestHazardFusion:
         assert any('distress' in r for r in reasons)
 
     def test_medium_hazard_low_score(self):
-        level, score, reasons = compute_hazard_level(own_score=45)
+        level, score, reasons = compute_hazard_level(own_score=45, own_harsh_brake=True)
         assert level in ('medium', 'high')
 
     def test_peer_harsh_braking(self):

@@ -163,8 +163,12 @@ body::before {
 }
 
 .dashboard-map {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
   position: relative;
   overflow: hidden;
+  height: 100%;
+  width: 100%;
 }
 
 .dashboard-sidebar {

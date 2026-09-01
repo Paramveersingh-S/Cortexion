@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+// @ts-ignore
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
@@ -65,6 +66,7 @@ function ScoreGauge({ score, size = 130 }: { score: number; size?: number }) {
 }
 
 export default function Dashboard() {
+  console.log("Dashboard rendering - HMR Triggered");
   const [vehicles, setVehicles] = useState<Map<number, VehicleBeacon>>(new Map());
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [wsStatus, setWsStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');

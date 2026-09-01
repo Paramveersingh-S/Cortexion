@@ -99,7 +99,7 @@ export function parseBeacon(buf) {
  */
 export function serializeBeacon(beacon) {
   const payload = Buffer.alloc(PAYLOAD_SIZE);
-  payload.writeUInt8(PROTO_VERSION, 0);
+  payload.writeUInt8(beacon.protoVersion !== undefined ? beacon.protoVersion : PROTO_VERSION, 0);
   payload.writeUInt16LE(beacon.vehicleId || 1, 1);
   payload.writeInt32LE(Math.round((beacon.lat || 0) * 1e6), 3);
   payload.writeInt32LE(Math.round((beacon.lon || 0) * 1e6), 7);

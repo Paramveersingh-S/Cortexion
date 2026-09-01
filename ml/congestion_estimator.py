@@ -37,7 +37,7 @@ class SegmentSpeedEstimator:
 
         Returns the updated mean speed estimate.
         """
-        now = now or time.time()
+        now = time.time() if now is None else now
         s = self.state[segment_id]
 
         if s['mean'] is None:

@@ -54,9 +54,8 @@ describe('parseBeacon', () => {
   });
 
   it('rejects beacon with unknown proto version', () => {
-    const buf = serializeBeacon(validBeacon);
-    buf[0] = 0xFF;  // Bad version
-    buf[20] = crc8(buf.subarray(0, 20));  // Fix CRC for the new content
+    const beacon = { ...validBeacon, protoVersion: 0xFF };
+    const buf = serializeBeacon(beacon);
     const parsed = parseBeacon(buf);
     expect(parsed.error).toBe('unknown_version');
   });

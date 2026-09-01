@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import Map, { Marker, Popup } from 'react-map-gl/maplibre';
-import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface VehicleBeacon {
@@ -25,8 +24,29 @@ const VEHICLE_COLORS: Record<number, string> = {
   2: '#ff8800',
 };
 
-// We use CARTO Dark Matter for a Palantir-like dark mode without API keys
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+// Inline raster style using Esri Dark Gray Canvas to avoid API key requirements
+const MAP_STYLE = {
+  version: 8,
+  sources: {
+    'esri-dark': {
+      type: 'raster',
+      tiles: [
+        'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+      ],
+      tileSize: 256,
+      attribution: '&copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+    }
+  },
+  layers: [
+    {
+      id: 'esri-dark-layer',
+      type: 'raster',
+      source: 'esri-dark',
+      minzoom: 0,
+      maxzoom: 16
+    }
+  ]
+};
 
 export default function VehicleMap({ vehicles }: Props) {
   const [popupInfo, setPopupInfo] = useState<VehicleBeacon | null>(null);
@@ -50,11 +70,10 @@ export default function VehicleMap({ vehicles }: Props) {
   }, [vehicles.length === 0]); // only recalculate if vehicles array goes from empty to populated
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       <Map
         initialViewState={initialViewState}
         mapStyle={MAP_STYLE}
-        mapLib={maplibregl}
         attributionControl={false}
         style={{ width: '100%', height: '100%' }}
       >

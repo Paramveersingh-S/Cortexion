@@ -56,7 +56,7 @@ def compute_hazard_level(
 
     # Cabin assessment
     if cabin_status == 'possible_distress':
-        score += 4
+        score += 6
         reasons.append('Cabin sensor flagged extended inactivity (possible distress)')
     elif cabin_status == 'no_movement':
         score += 1
@@ -64,7 +64,7 @@ def compute_hazard_level(
 
     # Peer vehicle assessment
     if peer_distance_m < 30 and peer_closing_speed_kmh > 40:
-        score += 4
+        score += 6
         reasons.append(f'Fast-closing vehicle within 30m ({peer_distance_m:.0f}m, '
                         f'{peer_closing_speed_kmh} km/h closing)')
     elif peer_distance_m < 100 and peer_closing_speed_kmh > 20:

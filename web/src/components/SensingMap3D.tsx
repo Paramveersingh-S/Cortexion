@@ -2,7 +2,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Line } from '@react-three/drei';
+import { OrbitControls, Line, Environment, ContactShadows, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface SensingMap3DProps {
@@ -13,61 +13,83 @@ interface SensingMap3DProps {
 }
 
 const CarChassis = () => {
-  // Simple wireframe chassis for a premium look
-  const points = useMemo(() => {
-    const pts = [];
-    // Base rectangle
-    pts.push(new THREE.Vector3(-1, 0, -2));
-    pts.push(new THREE.Vector3(1, 0, -2));
-    pts.push(new THREE.Vector3(1, 0, 2));
-    pts.push(new THREE.Vector3(-1, 0, 2));
-    pts.push(new THREE.Vector3(-1, 0, -2));
-    
-    // Roof
-    pts.push(new THREE.Vector3(-0.8, 1.2, -0.5));
-    pts.push(new THREE.Vector3(0.8, 1.2, -0.5));
-    pts.push(new THREE.Vector3(0.8, 1.2, 1));
-    pts.push(new THREE.Vector3(-0.8, 1.2, 1));
-    pts.push(new THREE.Vector3(-0.8, 1.2, -0.5));
-    return pts;
-  }, []);
-
+  // A sleek, holographic abstraction of a car for a professional look
   return (
     <group position={[0, -0.5, 0]}>
-      {/* Base plane with grid */}
-      <gridHelper args={[10, 20, 0x0070ff, 0x002050]} position={[0, -0.01, 0]} />
+      {/* Base plane with subtle grid */}
+      <gridHelper args={[15, 30, 0x0070ff, 0x002050]} position={[0, 0, 0]} />
       
-      {/* Car Outline */}
-      <Line points={points} color="#00c8ff" lineWidth={2} dashed dashScale={10} dashSize={1} gapSize={0.5} />
+      {/* Sleek Underbody Glow */}
+      <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[2.5, 5]} />
+        <meshBasicMaterial color="#0050ff" transparent opacity={0.15} />
+      </mesh>
+
+      {/* Main Body (Holographic Glass) */}
+      <RoundedBox args={[2.2, 0.8, 4.6]} position={[0, 0.45, 0]} radius={0.1} smoothness={4}>
+        <meshPhysicalMaterial 
+          color="#001133" 
+          transmission={0.8}
+          opacity={1}
+          metalness={0.2}
+          roughness={0.1}
+          ior={1.5}
+          thickness={0.5}
+          clearcoat={1}
+          transparent
+        />
+      </RoundedBox>
+
+      {/* Cabin Roof (Holographic Glass) */}
+      <RoundedBox args={[1.8, 0.6, 2.5]} position={[0, 1.15, -0.2]} radius={0.1} smoothness={4}>
+        <meshPhysicalMaterial 
+          color="#002244" 
+          transmission={0.9}
+          opacity={1}
+          metalness={0.1}
+          roughness={0.1}
+          ior={1.4}
+          thickness={0.2}
+          clearcoat={1}
+          transparent
+        />
+      </RoundedBox>
+      
+      {/* Neon Edge Highlights */}
+      <Line 
+        points={[
+          [-1.1, 0.1, -2.3], [1.1, 0.1, -2.3], [1.1, 0.1, 2.3], [-1.1, 0.1, 2.3], [-1.1, 0.1, -2.3]
+        ]} 
+        color="#00ffff" lineWidth={1.5} 
+      />
+      <Line 
+        points={[
+          [-0.9, 0.85, -1.45], [0.9, 0.85, -1.45], [0.9, 0.85, 1.05], [-0.9, 0.85, 1.05], [-0.9, 0.85, -1.45]
+        ]} 
+        color="#0088ff" lineWidth={1} 
+      />
       
       {/* Wheels */}
-      {[-1, 1].map(x => 
-        [-1.5, 1.5].map(z => (
-          <mesh key={`${x}-${z}`} position={[x*1.1, 0.3, z]} rotation={[Math.PI/2, 0, Math.PI/2]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
-            <meshBasicMaterial color="#0c0d14" wireframe />
-          </mesh>
+      {[-1.1, 1.1].map(x => 
+        [-1.6, 1.6].map(z => (
+          <group key={`${x}-${z}`} position={[x, 0.35, z]} rotation={[0, 0, Math.PI/2]}>
+            <mesh>
+              <cylinderGeometry args={[0.35, 0.35, 0.2, 32]} />
+              <meshStandardMaterial color="#0c0d14" metalness={0.8} roughness={0.5} />
+            </mesh>
+            {/* Wheel Rim glow */}
+            <mesh position={[0, x > 0 ? 0.11 : -0.11, 0]}>
+              <ringGeometry args={[0.2, 0.25, 32]} />
+              <meshBasicMaterial color="#0050ff" />
+            </mesh>
+          </group>
         ))
       )}
       
-      {/* Seats (Representational) */}
-      <mesh position={[0.4, 0.2, -0.5]}>
-         <boxGeometry args={[0.5, 0.1, 0.6]} />
-         <meshBasicMaterial color="#1a1c29" wireframe />
-      </mesh>
-      <mesh position={[-0.4, 0.2, -0.5]}>
-         <boxGeometry args={[0.5, 0.1, 0.6]} />
-         <meshBasicMaterial color="#1a1c29" wireframe />
-      </mesh>
-      <mesh position={[0, 0.2, 1.2]}>
-         <boxGeometry args={[1.5, 0.1, 0.6]} />
-         <meshBasicMaterial color="#1a1c29" wireframe />
-      </mesh>
-      
-      {/* Dashboard (Sensor Location) */}
-      <mesh position={[0, 0.6, -1.2]}>
-         <boxGeometry args={[1.8, 0.2, 0.4]} />
-         <meshBasicMaterial color="#0070ff" opacity={0.3} transparent />
+      {/* Sensor Array / Radar Unit */}
+      <mesh position={[0, 0.7, -1.1]}>
+         <boxGeometry args={[0.6, 0.15, 0.3]} />
+         <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.8} />
       </mesh>
     </group>
   );
@@ -75,36 +97,34 @@ const CarChassis = () => {
 
 const HumanTarget = ({ present, targetDistM, motionState }: { present: boolean, targetDistM: number, motionState: string }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
+  const materialRef = useRef<THREE.MeshPhysicalMaterial>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
-      // Bobbing effect for motion
       if (motionState !== 'stationary' && motionState !== 'none') {
-        meshRef.current.position.y = 0.5 + Math.sin(state.clock.elapsedTime * 5) * 0.05;
+        meshRef.current.position.y = 0.6 + Math.sin(state.clock.elapsedTime * 4) * 0.04;
       } else {
-        meshRef.current.position.y = 0.5;
+        meshRef.current.position.y = 0.6;
       }
       
-      // Pulse effect based on motion state
       if (materialRef.current) {
-         materialRef.current.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 3) * 0.5;
+         materialRef.current.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.3;
       }
     }
   });
 
   if (!present) return null;
 
-  // The sensor is at z = -1.2. The target distance goes back into the car (positive z).
-  const targetZ = -1.2 + targetDistM;
-  // We assume driver seat (x = 0.4) for single target demo
-  const targetX = 0.4; 
+  // Sensor array is at z = -1.1 relative to the car group.
+  const targetZ = -1.1 + targetDistM;
+  // Representing the driver seat (approx left-hand side or generalized)
+  const targetX = 0.45; 
 
   const getColor = () => {
     switch(motionState) {
-      case 'micro': return '#00e87b'; // Breathing -> Green
-      case 'moving': return '#00c8ff'; // Moving -> Cyan
-      case 'stationary': return '#ff9500'; // Still -> Orange
+      case 'micro': return '#00ffaa'; // Breathing
+      case 'moving': return '#00ffff'; // Moving
+      case 'stationary': return '#ffaa00'; // Still
       default: return '#7a8098'; // Unknown
     }
   };
@@ -112,38 +132,41 @@ const HumanTarget = ({ present, targetDistM, motionState }: { present: boolean, 
   const color = getColor();
 
   return (
-    <mesh ref={meshRef} position={[targetX, 0.5, targetZ]}>
-      <sphereGeometry args={[0.3, 32, 32]} />
-      <meshStandardMaterial 
-        ref={materialRef}
-        color={color} 
-        emissive={color}
-        emissiveIntensity={0.5}
-        transparent
-        opacity={0.8}
-        wireframe
-      />
-      {/* Core glow */}
-      <mesh>
-        <sphereGeometry args={[0.15, 16, 16]} />
-        <meshBasicMaterial color="#ffffff" />
+    <group position={[targetX, 0, targetZ]}>
+      {/* Glowing point cloud/holographic representation of human presence */}
+      <mesh ref={meshRef} position={[0, 0.6, 0]}>
+        <capsuleGeometry args={[0.25, 0.5, 16, 32]} />
+        <meshPhysicalMaterial 
+          ref={materialRef}
+          color={color} 
+          emissive={color}
+          emissiveIntensity={0.8}
+          transmission={0.5}
+          roughness={0.2}
+          transparent
+          opacity={0.85}
+        />
       </mesh>
-    </mesh>
+      {/* Ground projection */}
+      <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, 0.01, 0]}>
+        <ringGeometry args={[0.3, 0.35, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={0.6} />
+      </mesh>
+    </group>
   );
 };
 
 const RadarWaves = ({ gateEnergy }: { gateEnergy: number[] }) => {
-  // Render rings or planes representing the distance gates
   return (
-    <group position={[0, 0, -1.2]}>
+    <group position={[0, 0.2, -1.1]}>
        {gateEnergy.map((energy, index) => {
-         if (energy < 50) return null; // Only show active gates
-         const dist = index * 0.7; // Gate width approx 0.7m
-         const opacity = Math.min(energy / 500, 0.6);
+         if (energy < 40) return null; // Filter noise
+         const dist = index * 0.7; // Approx 0.7m per gate
+         const opacity = Math.min(energy / 400, 0.5);
          return (
            <mesh key={index} position={[0, 0, dist]} rotation={[Math.PI/2, 0, 0]}>
-             <torusGeometry args={[dist, 0.02, 8, 32]} />
-             <meshBasicMaterial color="#0070ff" transparent opacity={opacity} />
+             <torusGeometry args={[dist, 0.015, 16, 64]} />
+             <meshBasicMaterial color="#0088ff" transparent opacity={opacity} />
            </mesh>
          );
        })}
@@ -153,19 +176,33 @@ const RadarWaves = ({ gateEnergy }: { gateEnergy: number[] }) => {
 
 export default function SensingMap3D({ present, targetDistM, motionState, gateEnergy }: SensingMap3DProps) {
   return (
-    <div style={{ width: '100%', height: '100%', minHeight: '300px', background: 'transparent' }}>
-      <Canvas camera={{ position: [3, 3, 5], fov: 45 }}>
-        <ambientLight intensity={0.2} />
-        <pointLight position={[10, 10, 10]} intensity={0.5} />
+    <div style={{ width: '100%', height: '100%', minHeight: '400px', background: 'radial-gradient(circle at center, #0a0e17 0%, #030508 100%)' }}>
+      <Canvas camera={{ position: [4, 4, 6], fov: 40 }}>
+        {/* Advanced Lighting Setup */}
+        <ambientLight intensity={0.4} />
+        <spotLight position={[0, 10, 0]} intensity={1.5} penumbra={1} color="#0055ff" />
+        <pointLight position={[5, 2, 5]} intensity={0.5} color="#00aaff" />
+        <pointLight position={[-5, 2, -5]} intensity={0.5} color="#00aaff" />
+        
+        {/* Environment Map for Glass Reflections */}
+        <Environment preset="night" />
+        
         <OrbitControls 
           enablePan={false}
-          maxPolarAngle={Math.PI / 2 + 0.1}
-          minDistance={2}
-          maxDistance={10}
+          maxPolarAngle={Math.PI / 2 - 0.05} // Prevent going below ground
+          minPolarAngle={0}
+          minDistance={3}
+          maxDistance={12}
+          autoRotate
+          autoRotateSpeed={0.5}
         />
-        <CarChassis />
-        <HumanTarget present={present} targetDistM={targetDistM} motionState={motionState} />
-        <RadarWaves gateEnergy={gateEnergy} />
+        
+        <group position={[0, -0.5, 0]}>
+          <CarChassis />
+          <HumanTarget present={present} targetDistM={targetDistM} motionState={motionState} />
+          <RadarWaves gateEnergy={gateEnergy} />
+          <ContactShadows position={[0, -0.49, 0]} opacity={0.6} scale={10} blur={2} far={2} />
+        </group>
       </Canvas>
     </div>
   );

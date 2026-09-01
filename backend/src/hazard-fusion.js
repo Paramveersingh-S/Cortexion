@@ -60,7 +60,7 @@ export function computeHazardLevel({
 
   // ── Cabin assessment ──────────────────────────────────────────
   if (cabinStatus === 'possible_distress') {
-    score += 4;
+    score += 6;
     reasons.push('Cabin sensor flagged extended inactivity (possible distress)');
   } else if (cabinStatus === 'no_movement') {
     score += 1;
@@ -72,7 +72,7 @@ export function computeHazardLevel({
     const peerClosingSpeed = ownSpeed + (peer.speedKmh || 0);
 
     if (peerDistance < 30 && peerClosingSpeed > 40) {
-      score += 4;
+      score += 6;
       reasons.push(`Fast-closing vehicle within 30m (${Math.round(peerDistance)}m, ${peerClosingSpeed} km/h closing)`);
     } else if (peerDistance < 100 && peerClosingSpeed > 20) {
       score += 2;

@@ -88,7 +88,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: ml/requirements.txt
       - run: pip install -r requirements.txt
-      - run: pytest tests/ -v --tb=short
+      - run: PYTHONPATH=.. pytest tests/ -v --tb=short
 
   # ──────────────────────────────────────────
   # Simulator — Python Lint & Type Check
