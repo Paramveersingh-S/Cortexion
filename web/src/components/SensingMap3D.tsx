@@ -2,7 +2,7 @@
 
 import React, { useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Line, Environment, ContactShadows, RoundedBox } from '@react-three/drei';
+import { OrbitControls, Line, Environment, ContactShadows, RoundedBox, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface SensingMap3DProps {
@@ -13,7 +13,9 @@ interface SensingMap3DProps {
 }
 
 const CarChassis = () => {
-  // A sleek, holographic abstraction of a car for a professional look
+  // Load the highly realistic GLB car model
+  const { scene } = useGLTF('/CarConcept.glb');
+  
   return (
     <group position={[0, -0.5, 0]}>
       {/* Base plane with subtle grid */}
@@ -25,66 +27,9 @@ const CarChassis = () => {
         <meshBasicMaterial color="#0050ff" transparent opacity={0.15} />
       </mesh>
 
-      {/* Main Body (Holographic Glass) */}
-      <RoundedBox args={[2.2, 0.8, 4.6]} position={[0, 0.45, 0]} radius={0.1} smoothness={4}>
-        <meshPhysicalMaterial 
-          color="#001133" 
-          transmission={0.8}
-          opacity={1}
-          metalness={0.2}
-          roughness={0.1}
-          ior={1.5}
-          thickness={0.5}
-          clearcoat={1}
-          transparent
-        />
-      </RoundedBox>
-
-      {/* Cabin Roof (Holographic Glass) */}
-      <RoundedBox args={[1.8, 0.6, 2.5]} position={[0, 1.15, -0.2]} radius={0.1} smoothness={4}>
-        <meshPhysicalMaterial 
-          color="#002244" 
-          transmission={0.9}
-          opacity={1}
-          metalness={0.1}
-          roughness={0.1}
-          ior={1.4}
-          thickness={0.2}
-          clearcoat={1}
-          transparent
-        />
-      </RoundedBox>
-      
-      {/* Neon Edge Highlights */}
-      <Line 
-        points={[
-          [-1.1, 0.1, -2.3], [1.1, 0.1, -2.3], [1.1, 0.1, 2.3], [-1.1, 0.1, 2.3], [-1.1, 0.1, -2.3]
-        ]} 
-        color="#00ffff" lineWidth={1.5} 
-      />
-      <Line 
-        points={[
-          [-0.9, 0.85, -1.45], [0.9, 0.85, -1.45], [0.9, 0.85, 1.05], [-0.9, 0.85, 1.05], [-0.9, 0.85, -1.45]
-        ]} 
-        color="#0088ff" lineWidth={1} 
-      />
-      
-      {/* Wheels */}
-      {[-1.1, 1.1].map(x => 
-        [-1.6, 1.6].map(z => (
-          <group key={`${x}-${z}`} position={[x, 0.35, z]} rotation={[0, 0, Math.PI/2]}>
-            <mesh>
-              <cylinderGeometry args={[0.35, 0.35, 0.2, 32]} />
-              <meshStandardMaterial color="#0c0d14" metalness={0.8} roughness={0.5} />
-            </mesh>
-            {/* Wheel Rim glow */}
-            <mesh position={[0, x > 0 ? 0.11 : -0.11, 0]}>
-              <ringGeometry args={[0.2, 0.25, 32]} />
-              <meshBasicMaterial color="#0050ff" />
-            </mesh>
-          </group>
-        ))
-      )}
+      {/* Realistic Car Model */}
+      {/* Adjusting scale and rotation to match the typical car coordinate system in three.js */}
+      <primitive object={scene} scale={0.5} position={[0, 0, 0]} rotation={[0, Math.PI, 0]} />
       
       {/* Sensor Array / Radar Unit */}
       <mesh position={[0, 0.7, -1.1]}>
@@ -94,6 +39,8 @@ const CarChassis = () => {
     </group>
   );
 };
+// Preload the model
+useGLTF.preload('/CarConcept.glb');
 
 const HumanTarget = ({ present, targetDistM, motionState }: { present: boolean, targetDistM: number, motionState: string }) => {
   const meshRef = useRef<THREE.Mesh>(null);
