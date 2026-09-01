@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Map, { Marker, Popup } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import type { StyleSpecification } from 'maplibre-gl';
 
 interface VehicleBeacon {
   vehicleId: number;
@@ -25,7 +26,7 @@ const VEHICLE_COLORS: Record<number, string> = {
 };
 
 // Inline raster style using Esri Dark Gray Canvas to avoid API key requirements
-const MAP_STYLE = {
+const MAP_STYLE: StyleSpecification = {
   version: 8,
   sources: {
     'esri-dark': {
