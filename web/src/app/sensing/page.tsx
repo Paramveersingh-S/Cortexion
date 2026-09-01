@@ -8,8 +8,8 @@ import PresenceIndicator from '@/components/PresenceIndicator';
 import Link from 'next/link';
 import { Radio, Shield, Activity } from 'lucide-react';
 
-// Dynamically import RadarSweep to avoid SSR issues with canvas
-const RadarSweep = dynamic(() => import('@/components/RadarSweep'), { ssr: false });
+// Dynamically import SensingMap3D to avoid SSR issues with canvas
+const SensingMap3D = dynamic(() => import('@/components/SensingMap3D'), { ssr: false });
 
 interface MmWaveData {
   vehicleId: number;
@@ -157,11 +157,11 @@ export default function SensingPage() {
         {/* Radar Visualization */}
         <div className="sensing-radar">
           <div className="glass-card" style={{ padding: 0, overflow: 'hidden', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <RadarSweep
-              gateEnergy={data.gateEnergy}
-              targetDistM={data.targetDistM}
+            <SensingMap3D
               present={data.present}
-              maxEnergyGate={data.maxEnergyGate}
+              targetDistM={data.targetDistM}
+              motionState={data.motionState}
+              gateEnergy={data.gateEnergy}
             />
           </div>
         </div>

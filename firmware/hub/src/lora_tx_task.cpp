@@ -145,8 +145,38 @@ void loraTxTask(void* pv) {
         continue;
       }
 
-      if (xSemaphoreTake(spiBusMutex, pdMS_TO_TICKS(100))) {
-        LoRa.setSpreadingFactor(sf);
+      // ── Listen-Before-Talk (CSMA) & Jitter ──
+      // Add random jitter to avoid repeated collisions if two vehicles sync up
+      uint32_t jitterMs = esp_random() % 100;
+      vTaskDelay(pdMS_TO_TICKS(jitterMs));
+
+      bool channelClear = false;
+      for (int retries = 0; retries < 3; retries++) {
+        if (xSemaphoreTake(spiBusMutex, pdMS_TO_TICKS(100))) {
+          // If a packet is available, it means the channel is busy right now
+          // (lora_rx_task will read it on its next cycle)
+          int packetSize = LoRa.parsePacket();
+          if (packetSize > 0) {
+            xSemaphoreGive(spiBusMutex); // Channel busy, give back mutex
+          } else {
+            channelClear = true; // Channel is clear, keep the mutex for transmission
+            break; 
+          }
+        }
+        
+        // Channel was busy, exponential backoff
+        uint32_t backoff = 50 + (esp_random() % (50 * (1 << retries)));
+        Serial.printf("[LORA-TX] Channel busy, backing off for %lums\n", backoff);
+        vTaskDelay(pdMS_TO_TICKS(backoff));
+      }
+
+      if (!channelClear) {
+        Serial.println("[LORA-TX] Channel busy after max retries — dropping beacon");
+        continue;
+      }
+
+      // At this point, we HOLD the spiBusMutex and the channel is clear!
+      LoRa.setSpreadingFactor(sf);
 
         uint32_t txStart = millis();
 
@@ -186,7 +216,8 @@ void loraTxTask(void* pv) {
           Serial.printf("[LORA-TX] Beacon #%lu sent (SF%d, %lums, duty=%.1f%%)\n",
                         txCount, sf, actualAirtime, dutyGuard.usagePercent());
         }
-      }
+      } // end if (channelClear) -> Note: spiBusMutex was released inside the transmission block
     }
   }
 }
+

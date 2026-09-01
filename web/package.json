@@ -9,14 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "framer-motion": "^11.5.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.447.0",
+    "maplibre-gl": "^6.6.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "leaflet": "^1.9.4",
     "react-leaflet": "^5.0.0",
+    "react-map-gl": "^8.1.2",
     "recharts": "^2.13.0",
-    "framer-motion": "^11.5.0",
-    "lucide-react": "^0.447.0"
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.12",

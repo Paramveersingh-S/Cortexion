@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useMemo, useState } from 'react';
+import Map, { Marker, Popup } from 'react-map-gl';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface VehicleBeacon {
   vehicleId: number;
@@ -24,92 +25,113 @@ const VEHICLE_COLORS: Record<number, string> = {
   2: '#ff8800',
 };
 
-function createVehicleIcon(vehicleId: number, heading: number, hazardLevel: string) {
-  const color = hazardLevel === 'high' ? '#ff3344' :
-                hazardLevel === 'medium' ? '#ff8800' :
-                VEHICLE_COLORS[vehicleId] || '#00d4ff';
-
-  const svg = `
-    <svg width="36" height="36" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
-      <g transform="rotate(${heading}, 18, 18)">
-        <circle cx="18" cy="18" r="14" fill="${color}22" stroke="${color}" stroke-width="2"/>
-        <polygon points="18,6 24,24 18,20 12,24" fill="${color}" opacity="0.9"/>
-      </g>
-      <text x="18" y="32" text-anchor="middle" fill="white" font-size="8" font-weight="bold"
-            font-family="monospace">V${vehicleId}</text>
-    </svg>`;
-
-  return L.divIcon({
-    html: svg,
-    className: '',
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-  });
-}
+// We use CARTO Dark Matter for a Palantir-like dark mode without API keys
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 export default function VehicleMap({ vehicles }: Props) {
-  const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<Map<number, L.Marker>>(new Map());
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [popupInfo, setPopupInfo] = useState<VehicleBeacon | null>(null);
 
-  // Initialize map
-  useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-
-    const map = L.map(containerRef.current, {
-      center: [28.6139, 77.2090],  // Delhi default
-      zoom: 14,
-      zoomControl: true,
-      attributionControl: false,
-    });
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(map);
-
-    mapRef.current = map;
-
-    return () => { map.remove(); mapRef.current = null; };
-  }, []);
-
-  // Update markers
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    vehicles.forEach(v => {
-      if (!v.lat || !v.lon) return;
-      const pos: L.LatLngExpression = [v.lat, v.lon];
-      const icon = createVehicleIcon(v.vehicleId, v.headingDeg, v.hazard?.level || 'low');
-
-      const existing = markersRef.current.get(v.vehicleId);
-      if (existing) {
-        existing.setLatLng(pos);
-        existing.setIcon(icon);
-      } else {
-        const marker = L.marker(pos, { icon }).addTo(mapRef.current!);
-        marker.bindPopup(`
-          <div style="font-family:monospace;font-size:12px;">
-            <strong>Vehicle ${v.vehicleId}</strong><br/>
-            Speed: ${v.speedKmh} km/h<br/>
-            Score: ${v.drivingScore}/100<br/>
-            Cabin: ${v.cabinStatus}<br/>
-            Pos: ${v.lat.toFixed(4)}, ${v.lon.toFixed(4)}
-          </div>
-        `);
-        markersRef.current.set(v.vehicleId, marker);
-      }
-    });
-
-    // Auto-fit bounds if we have vehicles
-    if (vehicles.length > 0 && vehicles[0].lat) {
-      const bounds = L.latLngBounds(
-        vehicles.filter(v => v.lat && v.lon).map(v => [v.lat, v.lon] as L.LatLngExpression)
-      );
-      if (bounds.isValid()) {
-        mapRef.current.fitBounds(bounds.pad(0.3));
-      }
+  // Compute view state based on vehicles
+  const initialViewState = useMemo(() => {
+    if (vehicles.length > 0 && vehicles[0].lat && vehicles[0].lon) {
+      return {
+        longitude: vehicles[0].lon,
+        latitude: vehicles[0].lat,
+        zoom: 14,
+        pitch: 45, // Add some pitch for a 3D effect
+      };
     }
-  }, [vehicles]);
+    return {
+      longitude: 77.2090, // Delhi default
+      latitude: 28.6139,
+      zoom: 14,
+      pitch: 45,
+    };
+  }, [vehicles.length === 0]); // only recalculate if vehicles array goes from empty to populated
 
-  return <div ref={containerRef} style={{ height: '100%', width: '100%' }} />;
+  return (
+    <div style={{ height: '100%', width: '100%' }}>
+      <Map
+        initialViewState={initialViewState}
+        mapStyle={MAP_STYLE}
+        mapLib={maplibregl}
+        attributionControl={false}
+      >
+        {vehicles.map(v => {
+          if (!v.lat || !v.lon) return null;
+          
+          const hazardLevel = v.hazard?.level || 'low';
+          const color = hazardLevel === 'high' ? '#ff3344' :
+                        hazardLevel === 'medium' ? '#ff8800' :
+                        VEHICLE_COLORS[v.vehicleId] || '#00d4ff';
+
+          return (
+            <Marker 
+              key={`marker-${v.vehicleId}`}
+              longitude={v.lon} 
+              latitude={v.lat} 
+              anchor="center"
+              onClick={(e: any) => {
+
+                e.originalEvent.stopPropagation();
+                setPopupInfo(v);
+              }}
+            >
+              <div style={{
+                transform: `rotate(${v.headingDeg}deg)`,
+                width: '36px', height: '36px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+                filter: `drop-shadow(0 0 8px ${color}88)`
+              }}>
+                <svg width="36" height="36" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="18" cy="18" r="14" fill={`${color}22`} stroke={color} strokeWidth="2"/>
+                  <polygon points="18,6 24,24 18,20 12,24" fill={color} opacity={0.9}/>
+                </svg>
+              </div>
+              <div style={{
+                position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+                color: 'white', fontSize: '10px', fontWeight: 'bold', fontFamily: 'monospace',
+                marginTop: '2px', textShadow: '0 0 4px #000'
+              }}>
+                V{v.vehicleId}
+              </div>
+            </Marker>
+          );
+        })}
+
+        {popupInfo && (
+          <Popup
+            longitude={popupInfo.lon}
+            latitude={popupInfo.lat}
+            anchor="bottom"
+            onClose={() => setPopupInfo(null)}
+            closeButton={false}
+            className="custom-popup"
+            style={{ fontFamily: 'monospace', fontSize: '12px', background: 'transparent' }}
+          >
+            <div style={{
+              background: 'rgba(12, 13, 20, 0.95)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '12px',
+              borderRadius: '8px',
+              color: '#e8eaf0',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+            }}>
+              <strong style={{ color: VEHICLE_COLORS[popupInfo.vehicleId] || '#00d4ff', fontSize: '14px' }}>
+                Vehicle {popupInfo.vehicleId}
+              </strong><br/>
+              <div style={{ marginTop: '8px' }}>Speed: {popupInfo.speedKmh} km/h</div>
+              <div>Score: {popupInfo.drivingScore}/100</div>
+              <div>Cabin: {popupInfo.cabinStatus}</div>
+              <div style={{ fontSize: '10px', color: '#7a8098', marginTop: '4px' }}>
+                {popupInfo.lat.toFixed(4)}, {popupInfo.lon.toFixed(4)}
+              </div>
+            </div>
+          </Popup>
+        )}
+      </Map>
+    </div>
+  );
 }
