@@ -135,11 +135,12 @@ export default function Dashboard() {
           <span style={{ letterSpacing: '1.5px', fontSize: '1.05rem' }}>CORTEXION</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '4px', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+        <div style={{ display: 'flex', gap: '4px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 10, pointerEvents: 'auto' }}>
           <Link href="/" style={{ padding: '8px 18px', background: 'rgba(0,200,255,0.08)', border: '1px solid rgba(0,200,255,0.15)', borderRadius: 'var(--radius-sm)', color: 'var(--accent-cyan)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.5px' }}>Dashboard</Link>
           <Link href="/analytics" style={{ padding: '8px 18px', background: 'transparent', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.5px', transition: 'all 0.2s' }}>Analytics</Link>
           <Link href="/sensing" style={{ padding: '8px 18px', background: 'transparent', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.5px', transition: 'all 0.2s' }}>Cabin Monitor</Link>
         </div>
+
 
         <div className="nav-status">
           <span style={{ fontSize: '0.7rem', color: 'var(--text-dimmed)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>

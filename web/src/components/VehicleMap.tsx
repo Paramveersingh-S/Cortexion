@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Map, { Marker, Popup } from 'react-map-gl';
+import Map, { Marker, Popup } from 'react-map-gl/maplibre';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -56,6 +56,7 @@ export default function VehicleMap({ vehicles }: Props) {
         mapStyle={MAP_STYLE}
         mapLib={maplibregl}
         attributionControl={false}
+        style={{ width: '100%', height: '100%' }}
       >
         {vehicles.map(v => {
           if (!v.lat || !v.lon) return null;
