@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line, Environment, ContactShadows, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
@@ -185,7 +185,9 @@ export default function SensingMap3D({ present, targetDistM, motionState, gateEn
         <pointLight position={[-5, 2, -5]} intensity={0.5} color="#00aaff" />
         
         {/* Environment Map for Glass Reflections */}
-        <Environment preset="night" />
+        <Suspense fallback={null}>
+          <Environment preset="night" />
+        </Suspense>
         
         <OrbitControls 
           enablePan={false}
@@ -201,7 +203,9 @@ export default function SensingMap3D({ present, targetDistM, motionState, gateEn
           <CarChassis />
           <HumanTarget present={present} targetDistM={targetDistM} motionState={motionState} />
           <RadarWaves gateEnergy={gateEnergy} />
-          <ContactShadows position={[0, -0.49, 0]} opacity={0.6} scale={10} blur={2} far={2} />
+          <Suspense fallback={null}>
+            <ContactShadows position={[0, -0.49, 0]} opacity={0.6} scale={10} blur={2} far={2} />
+          </Suspense>
         </group>
       </Canvas>
     </div>
